@@ -1,10 +1,11 @@
 """API endpoints для работы с пользователями."""
 
 import logging
+from hashlib import sha256
 
+import bcrypt
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
-from passlib.hash import bcrypt
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -25,8 +26,11 @@ async def create_user(data: UserCreate, db: Session = Depends(get_db)):
     """Создание нового пользователя."""
     logger.info("Creating user with email=%s", data.email)
 
-    # Хешируем пароль
-    hashed_password = bcrypt.hash(data.password)
+    # Хешируем пароль (bcrypt ограничен 72 байтами, используем SHA256 для длинных)
+    password_bytes = data.password.encode("utf-8")
+    if len(password_bytes) > 72:
+        password_bytes = sha256(password_bytes).digest()
+    hashed_password = bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode("utf-8")
 
     user = User(
         email=data.email,

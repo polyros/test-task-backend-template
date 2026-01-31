@@ -1,13 +1,13 @@
 """Pydantic схемы для валидации данных."""
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserCreate(BaseModel):
     """Схема для создания пользователя."""
 
     email: EmailStr
-    password: str = Field(min_length=8)
+    password: str = Field(min_length=8, max_length=72)
     name: str = Field(default="", max_length=100)
 
 
@@ -18,8 +18,7 @@ class UserResponse(BaseModel):
     email: str
     name: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OrderResponse(BaseModel):
@@ -29,8 +28,7 @@ class OrderResponse(BaseModel):
     title: str
     amount: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserWithOrdersResponse(BaseModel):
@@ -41,8 +39,7 @@ class UserWithOrdersResponse(BaseModel):
     name: str
     orders: list[OrderResponse]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EmailVerifyResponse(BaseModel):
